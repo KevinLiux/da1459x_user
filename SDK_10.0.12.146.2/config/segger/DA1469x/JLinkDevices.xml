@@ -1,0 +1,9 @@
+<DataBase>
+  <!--                 -->
+  <!-- DIALOG (DA1469x)-->
+  <!--                 -->
+  <Device>
+    <ChipInfo Vendor="Dialog Semiconductor" Name="DA1469x" WorkRAMAddr="0x810000" WorkRAMSize="0x10000" Core="JLINK_CORE_CORTEX_M33" />
+    <FlashBankInfo Name="QSPI Flash" BaseAddr="0x16000000" MaxSize="0x2000000" Loader="../../../binaries/da1469x/qflash/segger_flash_loader.elf" LoaderType="FLASH_ALGO_TYPE_OPEN" />
+  </Device>
+</DataBase>

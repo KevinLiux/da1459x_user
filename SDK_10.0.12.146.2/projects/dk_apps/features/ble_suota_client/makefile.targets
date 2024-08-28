@@ -1,0 +1,20 @@
+LDSCRIPT_PATH=../ldscripts
+SW_VERSION_PATH=../sw_version.h
+BINARIES_PATH=../../../../../binaries
+
+.PHONY: generate_ldscripts FORCE
+
+FORCE:
+
+generate_ldscripts : mem.ld sections.ld
+
+%.ld : $(LDSCRIPT_PATH)/%.ld.h FORCE
+	"$(CC)" -I "$(BSP_CONFIG_DIR)" -I "$(MIDDLEWARE_CONFIG_DIR)" $(PRE_BUILD_EXTRA_DEFS) -imacros "$(APP_CONFIG_H)" $(LD_DEFS) -Ddg_configDEVICE=$(DEVICE) -E -P -c "$<" -o "$@"
+
+%.img: %.bin
+	@echo 'Preparing SUOTA image'
+	@echo 'Invoking: mkimage'
+	"$(PYTHON)" "$(SCRIPT)" -q -p "$(REVISION)" --sw_version "$(SW_VERSION_PATH)" $< $@
+	@echo ' '
+	@echo 'Copying image'
+	install -v $@ $(BINARIES_PATH)

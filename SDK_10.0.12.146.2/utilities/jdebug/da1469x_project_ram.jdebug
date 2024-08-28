@@ -1,0 +1,225 @@
+
+/*********************************************************************
+*
+*       OnProjectLoad
+*
+* Function description
+*   Project load routine. Required.
+*
+**********************************************************************
+*/
+void OnProjectLoad (void) {
+  Edit.Preference (PREF_TIMESTAMP_FORMAT, TIMESTAMP_FORMAT_INST_CNT);
+  // SDK10 top directory
+  Project.SetRootPath("$(ProjectDir)/../../../");
+  //
+  // Dialog-generated settings
+  //
+  Project.SetDevice ("Cortex-M33");
+  Project.SetHostIF ("USB", "");
+  Project.SetTargetIF ("SWD");
+  Project.SetTIFSpeed ("4 MHz");
+  Project.AddSvdFile ("Cortex-M33.svd");
+  Project.AddSvdFile ("config/embsys/Dialog_Semiconductor/DA1469x.xml");
+
+  Project.SetTraceSource ("TRACE_SOURCE_ETB");
+  Project.SetOSPlugin ("FreeRTOSPlugin_CM4");
+  Window.Show ("Call Stack");
+  Window.Show ("Instruction Trace");
+  Window.Show ("FreeRTOS");
+  Window.Show ("Memory");
+
+  // ELF to load automatically when debug project is loaded
+  File.Open("projects/dk_apps/demos/pxp_reporter/DA1469x-00-Debug_RAM/pxp_reporter.elf");
+}
+
+/*********************************************************************
+*
+*      TargetReset
+*
+* Function description
+*   Replaces the default target device reset routine. Optional.
+*
+**********************************************************************
+*/
+//void TargetReset (void) {
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetReset
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetReset (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetReset
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+void AfterTargetReset (void) {
+	Target.WriteU32(0x20010000, 0xdeadbeef);
+	Target.WriteU32(0x20010004, 0xdeadbeef);
+	Target.WriteU32(0x20010008, 0xdeadbeef);
+	Target.WriteU32(0x2001000c, 0xdead10cc);
+
+    Target.WriteU32(0x50000010, 0x10); // CLK_RADIO_REG = reset value
+	Target.WriteU32(0x500000f0, 0x08c35bdd); // POWER_CTRL_REG = reset value
+	Target.WriteU32(0x50000020, 0xf); // PMU_CTRL_REG = reset value
+}
+
+/*********************************************************************
+*
+*       DebugStart
+*
+* Function description
+*   Replaces the default debug session startup routine. Optional.
+*
+**********************************************************************
+*/
+//void DebugStart (void) {
+//}
+
+/*********************************************************************
+*
+*       TargetConnect
+*
+* Function description
+*   Replaces the default target IF connection routine. Optional.
+*
+**********************************************************************
+*/
+//void TargetConnect (void) {
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetConnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetConnect (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetConnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+void AfterTargetConnect (void) {
+	Exec.Command("CORESIGHT_SetMTBBufUsageSize 0x2000");
+	Exec.Command("CORESIGHT_SetMTBBufUseAddr 0x2007E000");
+}
+
+/*********************************************************************
+*
+*       TargetDownload
+*
+* Function description
+*   Replaces the default program download routine. Optional.
+*
+**********************************************************************
+*/
+//void TargetDownload (void) {
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetDownload
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+void BeforeTargetDownload (void) {
+	Util.Log("Downloading image...");
+
+    Target.WriteU32(0x50000010, 0x10); // CLK_RADIO_REG = reset value
+	Target.WriteU32(0x500000f0, 0x08c35bdd); // POWER_CTRL_REG = reset value
+	Target.WriteU32(0x50000020, 0xf); // PMU_CTRL_REG = reset value
+
+	Target.WriteU32(0x100C0050, 1);
+	Exec.Reset();
+
+	/* SYS_CTRL_REG: Remap RAM to 0, enable SYSCPU and CMAC debugger */
+	Target.WriteU32(0x50000024, 0xC3);
+}
+
+/*********************************************************************
+*
+*      AfterTargetDownload
+*
+* Function description
+*   Event handler routine.
+*
+**********************************************************************
+*/
+void AfterTargetDownload (void) {
+	Util.Log("Image downloaded.");
+	Exec.Reset();
+}
+
+/*********************************************************************
+*
+*       BeforeTargetDisconnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetDisconnect (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetDisconnect
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetDisconnect (void) {
+//}
+
+/*********************************************************************
+*
+*       AfterTargetHalt
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void AfterTargetHalt (void) {
+//}
+
+/*********************************************************************
+*
+*       BeforeTargetResume
+*
+* Function description
+*   Event handler routine. Optional.
+*
+**********************************************************************
+*/
+//void BeforeTargetResume (void) {
+//}
